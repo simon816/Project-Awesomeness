@@ -1,0 +1,56 @@
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDir new File(project.projectDir, "src")
+        }
+    }
+}
+
+ext.configFile = file "build.properties"
+
+configFile.withReader {
+    def prop = new Properties()
+    prop.load(it)
+    project.ext.config = new ConfigSlurper().parse prop
+    config.build_number = Integer.parseInt(config.build_number) + 1
+}
+ant.propertyfile(file: configFile) {
+    entry( key: "build_number", value: config.build_number)
+}
+
+
+archivesBaseName = 'ProjectAwesomeness'
+version = '1.1.5.' + config.build_number
+
+compileJava {
+    classpath += files(System.env.'JAVA_HOME' + '\\jre\\lib\\jfxrt.jar')
+}
+
+ext {
+    jdk = System.env.'JAVA_HOME'
+    mainClass = 'com.simon816.awesome.core.Main'
+}
+
+task jar(overwrite: true) {
+ outputs.upToDateWhen { false }
+ 
+  if (jdk != null && !jdk.isEmpty()) {
+  
+    def javafxpackager = exec {
+      workingDir "${project.projectDir.absolutePath}"
+ 
+      commandLine "${jdk}/bin/javafxpackager.exe",
+                  "-createjar",
+                  "-appclass", "${mainClass}",
+                  "-outdir", "${buildDir}${File.separator}${libsDir.name}",
+                  "-outfile", "${project.archivesBaseName}-${project.version}",
+                  "-srcdir", "${buildDir.name}/classes/main",
+                  "-srcfiles", "."
+    }
+  }
+}
+
+tasks['jar'].dependsOn 'classes'
+tasks['assemble'].dependsOn 'jar'
