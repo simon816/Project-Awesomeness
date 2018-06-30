@@ -11,3 +11,5 @@ Features:
 - Scrolling text
 - Set all clients to show a given color.
 - A simple pong game where the leftmost and rightmost computers have control of the paddles.
+
+[See Demo GIF](https://github.com/simon816/Project-Awesomeness/blob/master/demo.gif) (1MB).
